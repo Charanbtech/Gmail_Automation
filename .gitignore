@@ -6,5 +6,7 @@ pending_meetings.json
 live_state.json
 process_report.json
 __pycache__/
-*.pycserver_*.log
+*.pyc
+server_err.log
+server_out.log
 server_pid.txt
