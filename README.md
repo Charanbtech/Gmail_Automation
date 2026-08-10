@@ -1,71 +1,94 @@
-# Gmail to Google Calendar Automation
+# SyncFlow: Gmail to Google Calendar Automation 📅
 
-An intelligent, background-running automation pipeline that monitors your Gmail inbox in real-time, detects meeting-related emails, and automatically schedules them into your Google Calendar. It uses Google's Gemini AI for robust natural language extraction to parse unstructured email bodies and precisely extract meeting details like dates, times, and Google Meet links.
+Welcome to **SyncFlow**! This is a smart automation tool that reads your Gmail inbox and automatically schedules meeting invitations right onto your Google Calendar. 
 
-## Features
+It uses Artificial Intelligence (AI) to read the emails and figure out the exact date, time, and meeting link. If it gets confused by a messy email, it puts it in a "Manual Review" queue so you can fix it yourself!
 
-- **Live Inbox Monitoring**: A background daemon continuously polls the Gmail API for new emails.
-- **Smart Pre-filtering**: Before querying the AI, emails are passed through a highly optimized local regex/keyword filter, guaranteeing 0 API quota waste on spam, newsletters, or irrelevant emails.
-- **AI Meeting Extraction**: Uses Google's Gemini Flash model to seamlessly understand complex email threads, relative dates (e.g. "let's meet next Tuesday"), and timezone conversions.
-- **Automatic Calendar Sync**: Instantly creates Google Calendar events using the extracted details. 
-- **Two-way Sync (Deletions)**: The system monitors Google Calendar events in the background; if a user manually deletes the event from their calendar, the script detects this and updates its internal state.
-- **Local Fallbacks & Rate Limiting**: If Gemini API limits are hit, the system temporarily backs off and relies on a local regex-based parsing fallback mechanism to ensure uninterrupted service.
-- **Web UI Dashboard**: Built with FastAPI, providing a beautiful local dashboard to review processed emails, dismiss false positives, or manually approve low-confidence AI extractions.
+---
 
-## Tech Stack
+## 🛠️ Step 1: Getting Started
 
-- **Backend Framework:** FastAPI, Uvicorn
-- **AI/LLM:** `google-genai` (Gemini Flash Model)
-- **Google APIs:** Gmail API, Google Calendar API, Google Auth
-- **Validation:** Pydantic
+You only need to install two things to run this on your computer:
+1. **Python** (Downloads the backend).
+2. **Node.js** (Downloads the frontend dashboard).
 
-## Installation & Setup
+Open your terminal or command prompt inside this folder and run these exact commands:
 
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/Charanbtech/Gmail_Automation.git
-   cd Gmail_Automation
-   ```
-
-2. **Set up a Virtual Environment**
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
-   ```
-
-3. **Install Dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Environment Variables**
-   Create a `.env` file in the root directory and add your Gemini API Key:
-   ```env
-   GEMINI_API_KEY=your_api_key_here
-   GEMINI_MODEL=gemini-3.6-flash
-   ```
-
-5. **Google OAuth Credentials**
-   - Head to the [Google Cloud Console](https://console.cloud.google.com/).
-   - Enable the **Gmail API** and **Google Calendar API**.
-   - Create an OAuth 2.0 Client ID (Desktop App).
-   - Download the JSON credentials file and rename it to `credentials.json`, placing it in the root of the project.
-
-## Running the Application
-
-Run the FastAPI application using Uvicorn:
-
+### Install the Backend (Python)
 ```bash
-uvicorn main:app --reload
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
-1. Navigate to `http://localhost:8000/auth` to complete the initial Google OAuth login (this generates a local `token.json`).
-2. Visit `http://localhost:8000/ui/` to view the live dashboard and see emails being processed in real-time.
+### Install the Frontend (Dashboard)
+```bash
+cd frontend
+npm install
+cd ..
+```
 
-## Architecture & Logic Flow
+---
 
-1. **Daemon Polling**: `watcher.py` runs a background thread that polls Gmail every 8 seconds.
-2. **Pre-Filter Check**: Emails are checked against `is_meeting_candidate` to weed out non-meeting emails instantly.
-3. **LLM Extraction**: Valid candidates are sent to Gemini to extract a structured JSON object (`MeetingDetails`).
-4. **Calendar Scheduling**: If confidence is high (>80%), a Calendar Event is generated immediately. If not, it enters a "Pending Review" queue in the UI.
-5. **State Management**: All email tracking is handled in `live_state.json` allowing the script to safely resume after restarts.
+## 🔑 Step 2: Setup Your Secret Keys
+
+This app needs to connect to your Google Account and the Gemini AI. We keep these secrets safe inside a `.env` file.
+
+1. Find the file named `.env.example` in this folder.
+2. Rename it to just `.env`.
+3. Open the `.env` file in a text editor (like Notepad). You will see this:
+
+```text
+GOOGLE_CREDENTIALS_FILE=credentials.json
+GOOGLE_TOKEN_FILE=token.json
+GEMINI_API_KEY=your_gemini_api_key
+LOCAL_TIMEZONE=Asia/Kolkata
+```
+
+### How to get your Gemini API Key:
+1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey).
+2. Click **Create API Key**.
+3. Copy the key and paste it into your `.env` file next to `GEMINI_API_KEY=`.
+
+### How to get your Google Credentials:
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a new project and enable the **Gmail API** and **Google Calendar API**.
+3. Go to "Credentials" and create an **OAuth 2.0 Client ID** (choose "Desktop App").
+4. Download the JSON file, rename it to exactly `credentials.json`, and put it inside this folder!
+
+---
+
+## 🚀 Step 3: Run the App!
+
+You will need to open **two** terminal windows (one for the backend, one for the dashboard).
+
+### Terminal 1: Start the Backend Server
+Make sure you are in the main folder and run:
+```bash
+.venv\Scripts\activate
+python -m uvicorn main:app --reload
+```
+*Note: The very first time you run this, a web page will pop up asking you to log into your Google Account. Just click "Allow" so the app can read your emails and calendar!*
+
+### Terminal 2: Start the Beautiful Dashboard
+Open a new terminal, go into the frontend folder, and run:
+```bash
+cd frontend
+npm run dev
+```
+
+### 🎉 You're Done!
+Open your web browser and go to **`http://localhost:5173`**. You will see your live dashboard tracking your emails and adding meetings to your calendar automatically!
+
+---
+
+## ❓ FAQ (Frequently Asked Questions)
+
+**What if the AI misses an email?**
+If the AI isn't 100% sure about the time or date, it won't guess. Instead, it places the email into the **Manual Review Queue** on your dashboard. You can type in the correct time yourself and click "Approve".
+
+**How often does it check my email?**
+It securely checks your inbox every 8 seconds while the backend terminal is running. 
+
+**Is my data safe?**
+Yes! This script runs 100% locally on your own computer. Your emails are never sent anywhere except directly to Google's official Gemini AI for quick reading. 
