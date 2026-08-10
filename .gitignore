@@ -1,0 +1,10 @@
+.venv/
+.env
+credentials.json
+token.json
+pending_meetings.json
+live_state.json
+process_report.json
+__pycache__/
+*.pycserver_*.log
+server_pid.txt
