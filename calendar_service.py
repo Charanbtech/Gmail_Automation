@@ -92,7 +92,7 @@ def _parse_date_time(date_str, time_str, time_zone):
     time = None
     if time_str:
         t = time_str.strip().upper()
-        match = re.fullmatch(r"(\d{1,2}):(\d{2})\s*(AM|PM)?", t)
+        match = re.fullmatch(r"(\d{1,2})[:.](\d{2})\s*(AM|PM)?", t)
         if match:
             hour, minute, meridiem = match.groups()
             hour = int(hour)
@@ -103,7 +103,7 @@ def _parse_date_time(date_str, time_str, time_zone):
                 hour = 0
             time = dt.time(hour, minute)
         else:
-            match = re.fullmatch(r"(\d{1,2})(?::(\d{2}))?\s*(AM|PM)", t)
+            match = re.fullmatch(r"(\d{1,2})(?:[:.](\d{2}))?\s*(AM|PM)", t)
             if match:
                 hour, minute, meridiem = match.groups()
                 hour = int(hour)

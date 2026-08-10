@@ -2,7 +2,7 @@ import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
-from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 from ai_extractor import extract_meeting_info, is_meeting_candidate
 from auth import get_google_credentials
@@ -28,7 +28,14 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="Gmail to Google Calendar Automation", lifespan=lifespan)
-app.mount("/ui", StaticFiles(directory="static", html=True), name="ui")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
