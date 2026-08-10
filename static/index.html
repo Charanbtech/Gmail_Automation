@@ -118,7 +118,7 @@
                 }
                 const m = e.meeting || {};
                 const meetingInfo = m.meeting_title
-                    ? `<br><span class="sub">${escapeHtml(m.meeting_title || '')}${m.date ? ' &middot; ' + escapeHtml(m.date) + (m.time ? ' ' + escapeHtml(m.time) : '') : ''}</span>`
+                    ? `<br><span class="sub">${escapeHtml(m.meeting_title || '')}${m.date ? ' &middot; ' + escapeHtml(m.date) + (m.time ? ' ' + escapeHtml(m.time) : '') + (m.time_zone ? ' (' + escapeHtml(m.time_zone) + ')' : '') : ''}</span>`
                     : '';
                 return `<tr class="${e.status === 'deleted' ? 'deleted-row' : ''}">
                     <td>${escapeHtml(e.subject || e.email_id)}<br><span class="sub">${escapeHtml(e.from || e.email_id)}</span><br><span class="sub">Processed ${fmtTime(e.processed_at)}</span>${meetingInfo}</td>
