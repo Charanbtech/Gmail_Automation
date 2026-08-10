@@ -151,8 +151,12 @@ def _tick() -> None:
     gmail = get_gmail_service()
     calendar = get_calendar_service()
 
-    result = gmail.users().messages().list(userId="me", maxResults=BASELINE_MAX).execute()
-    inbox_ids = [m["id"] for m in result.get("messages", [])]
+    try:
+        result = gmail.users().messages().list(userId="me", maxResults=BASELINE_MAX).execute()
+        inbox_ids = [m["id"] for m in result.get("messages", [])]
+    except Exception as exc:
+        print(f"[watcher] failed to fetch inbox: {exc}")
+        return
 
     state = read_state()
     changed = False
@@ -178,8 +182,11 @@ def _tick() -> None:
     else:
         new_ids = [mid for mid in inbox_ids if mid not in state["emails"]][:MAX_NEW_PER_TICK]
         for mid in new_ids:
-            state["emails"][mid] = _process_email(gmail, calendar, mid)
-            changed = True
+            try:
+                state["emails"][mid] = _process_email(gmail, calendar, mid)
+                changed = True
+            except Exception as exc:
+                print(f"[watcher] failed to process email {mid}: {exc}")
 
     last_cal_scan = state.get("last_calendar_scan")
     if not last_cal_scan:
@@ -252,8 +259,12 @@ def _retry_failed_pending(gmail, state: dict, changed_already: bool) -> None:
             except ValueError:
                 pass
 
-        full_message = gmail.users().messages().get(userId="me", id=mid).execute()
-        email = parse_email_content(full_message)
+        try:
+            full_message = gmail.users().messages().get(userId="me", id=mid).execute()
+            email = parse_email_content(full_message)
+        except Exception as exc:
+            print(f"[watcher] retry failed for {mid}: {exc}")
+            continue
 
         if not is_meeting_candidate(email["subject"], email["body"]):
             entry["status"] = "skipped"
