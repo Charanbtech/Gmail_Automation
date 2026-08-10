@@ -183,7 +183,7 @@ def _tick() -> None:
 
     last_cal_scan = state.get("last_calendar_scan")
     if not last_cal_scan:
-        last_cal_scan = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+        last_cal_scan = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
 
     try:
         events_result = calendar.events().list(
